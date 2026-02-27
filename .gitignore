@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Build
+backend/dist/
+frontend/.next/
+frontend/out/
+
+# Environment
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Prototipar telas Reforma+
+Prototipar telas Reforma+

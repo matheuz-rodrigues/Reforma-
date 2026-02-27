@@ -1,9 +1,27 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import { PwaInstallPrompt } from '@/shared/components/pwa-install-prompt';
 
 export const metadata: Metadata = {
     title: 'Reforma+',
-    description: 'Sistema Reforma+',
+    description: 'Plataforma digital para reaproveitamento de materiais de construção',
+    manifest: '/manifest.json',
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: 'default',
+        title: 'Reforma+',
+    },
+    formatDetection: {
+        telephone: false,
+    },
+};
+
+export const viewport: Viewport = {
+    themeColor: '#FF6B00',
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
 };
 
 export default function RootLayout({
@@ -13,7 +31,13 @@ export default function RootLayout({
 }) {
     return (
         <html lang="pt-BR">
-            <body>{children}</body>
+            <head>
+                <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+            </head>
+            <body>
+                {children}
+                <PwaInstallPrompt />
+            </body>
         </html>
     );
 }

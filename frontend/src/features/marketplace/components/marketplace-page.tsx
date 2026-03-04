@@ -16,7 +16,15 @@ import {
     MessageCircle,
     Package,
     Clock,
+    Home,
+    ShoppingBag,
+    Calculator,
+    FileText,
+    User,
+    ArrowRight,
 } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const listings = [
     {
@@ -111,22 +119,71 @@ const listings = [
     },
 ];
 
+const navItems = [
+    { path: '/dashboard', label: 'Dashboard', icon: Home, description: 'Visão geral da obra' },
+    { path: '/marketplace', label: 'Marketplace', icon: ShoppingBag, description: 'Compra e venda' },
+    { path: '/calculator', label: 'Calculadora', icon: Calculator, description: 'Cálculo de materiais' },
+    { path: '/planning', label: 'Planejamento', icon: FileText, description: 'Gestão de tarefas' },
+];
+
 export default function MarketplacePage() {
+    const pathname = usePathname();
     const [activeTab, setActiveTab] = useState('all');
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
-            <div className="container mx-auto px-4 space-y-6">
+        <div className="min-h-screen bg-gray-50 pt-2 pb-8">
+            <div className="container mx-auto px-4 space-y-4">
+                {/* Interactive Navigation Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {navItems.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = pathname === item.path;
+                        return (
+                            <Link key={item.path} href={item.path} className="h-full">
+                                <Card className={`group relative h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-2 ${isActive ? 'border-primary ring-2 ring-primary/20' : 'border-transparent hover:border-primary/20'
+                                    }`}>
+                                    <div className={`absolute inset-0 bg-gradient-to-br transition-opacity duration-300 ${isActive ? 'from-primary/10 via-primary/5 to-transparent opacity-100' : 'from-primary/5 to-transparent opacity-0 group-hover:opacity-100'
+                                        }`} />
+                                    <CardContent className="p-4 flex flex-col items-center text-center relative z-10">
+                                        <div className={`mb-3 p-3 rounded-xl transition-colors duration-300 ${isActive ? 'bg-primary text-white' : 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white'
+                                            }`}>
+                                            <Icon className="h-6 w-6" />
+                                        </div>
+                                        <h3 className={`font-bold text-sm md:text-base mb-1 ${isActive ? 'text-primary' : 'text-foreground'
+                                            }`}>{item.label}</h3>
+                                        <p className="text-[10px] md:text-xs text-muted-foreground line-clamp-2 transition-opacity">
+                                            {item.description}
+                                        </p>
+                                    </CardContent>
+                                    {isActive && (
+                                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary" />
+                                    )}
+                                </Card>
+                            </Link>
+                        );
+                    })}
+                </div>
+
                 {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div>
-                        <h1 className="text-3xl font-bold">Marketplace</h1>
-                        <p className="text-muted-foreground mt-1">Compre e venda materiais de construção</p>
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pt-4">
+                    <div className="flex-1">
+                        <h1 className="text-3xl font-bold tracking-tight">Marketplace</h1>
+                        <p className="text-muted-foreground mt-1">Economize até 40% comprando materiais reaproveitáveis</p>
                     </div>
-                    <Button size="lg">
-                        <Package className="mr-2 h-4 w-4" />
-                        Anunciar Material
-                    </Button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="md:col-span-1">
+                        <Button variant="outline" size="lg" className="w-full h-full min-h-[56px]">
+                            Minhas Compras
+                        </Button>
+                    </div>
+                    <div className="md:col-span-3">
+                        <Button size="lg" className="w-full h-full min-h-[56px] text-lg font-bold shadow-xl shadow-primary/20 bg-primary hover:bg-primary/90">
+                            <Package className="mr-3 h-6 w-6" />
+                            Anunciar Material
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Search and Filters */}

@@ -1,90 +1,83 @@
-'use client';
-
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { Home, ShoppingBag, Calculator, FileText, User, Menu, X } from 'lucide-react';
+import Link from 'next/link';
+import { useAuthContext } from '@/features/auth';
+import { Settings, LogOut, ChevronDown } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
 
-const navItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: Home },
-    { path: '/marketplace', label: 'Marketplace', icon: ShoppingBag },
-    { path: '/calculator', label: 'Calculadora', icon: Calculator },
-    { path: '/planning', label: 'Planejamento', icon: FileText },
-    { path: '/profile', label: 'Perfil', icon: User },
-];
-
 export function Navigation() {
-    const pathname = usePathname();
-    const [mobileOpen, setMobileOpen] = useState(false);
+    const { user, logout } = useAuthContext();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    if (!user) return null;
+
+    const initials = user.name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .substring(0, 2);
 
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
             <div className="container mx-auto flex h-16 items-center justify-between px-4">
-                <Link href="/dashboard" className="flex items-center gap-2">
+                <Link href="/" className="flex items-center gap-2">
                     <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
                         <span className="text-white text-xl font-bold">R+</span>
                     </div>
                     <span className="text-xl font-bold text-primary">Reforma+</span>
                 </Link>
 
-                {/* Desktop Navigation */}
-                <nav className="hidden md:flex items-center gap-1">
-                    {navItems.map((item) => {
-                        const Icon = item.icon;
-                        const isActive = pathname === item.path;
-                        return (
-                            <Link
-                                key={item.path}
-                                href={item.path}
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive
-                                        ? 'bg-primary text-white'
-                                        : 'text-muted-foreground hover:text-primary hover:bg-accent'
-                                    }`}
-                            >
-                                <Icon className="h-4 w-4" />
-                                <span>{item.label}</span>
-                            </Link>
-                        );
-                    })}
-                </nav>
+                <div className="relative">
+                    <button
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        className="flex items-center gap-2 p-1 rounded-full hover:bg-black/5 transition-colors"
+                    >
+                        <Avatar className="h-8 w-8 border-2 border-primary/20">
+                            <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                                {initials}
+                            </AvatarFallback>
+                        </Avatar>
+                        <div className="hidden md:block text-left mr-1">
+                            <p className="text-xs font-bold leading-none">{user.email}</p>
+                            <p className="text-[10px] text-muted-foreground leading-none mt-1">Ver perfil</p>
+                        </div>
+                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isMenuOpen ? 'rotate-180' : ''}`} />
+                    </button>
 
-                {/* Mobile Toggle */}
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="md:hidden"
-                    onClick={() => setMobileOpen(!mobileOpen)}
-                >
-                    {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-                </Button>
-            </div>
+                    {isMenuOpen && (
+                        <>
+                            <div
+                                className="fixed inset-0 z-40"
+                                onClick={() => setIsMenuOpen(false)}
+                            />
+                            <div className="absolute right-0 mt-2 w-56 rounded-xl border bg-white shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in duration-200">
 
-            {/* Mobile Navigation */}
-            {mobileOpen && (
-                <div className="md:hidden border-t bg-white">
-                    <nav className="container mx-auto px-4 py-4 flex flex-col gap-1">
-                        {navItems.map((item) => {
-                            const Icon = item.icon;
-                            const isActive = pathname === item.path;
-                            return (
-                                <Link
-                                    key={item.path}
-                                    href={item.path}
-                                    onClick={() => setMobileOpen(false)}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
-                                            ? 'bg-primary text-white'
-                                            : 'text-muted-foreground hover:text-primary hover:bg-accent'
-                                        }`}
-                                >
-                                    <Icon className="h-5 w-5" />
-                                    <span>{item.label}</span>
-                                </Link>
-                            );
-                        })}
-                    </nav>
+                                <div className="p-1">
+                                    <Link
+                                        href="/profile"
+                                        onClick={() => setIsMenuOpen(false)}
+                                        className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
+                                    >
+                                        <Settings className="h-4 w-4" />
+                                        <span>Configurações do Perfil</span>
+                                    </Link>
+                                    <button
+                                        onClick={() => {
+                                            setIsMenuOpen(false);
+                                            logout();
+                                        }}
+                                        className="flex w-full items-center gap-2 px-3 py-2 text-sm rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                                    >
+                                        <LogOut className="h-4 w-4" />
+                                        <span>Sair da conta</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </div>
-            )}
+            </div>
         </header>
     );
 }

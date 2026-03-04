@@ -2,16 +2,20 @@
 
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowRight, Mail, Lock, Eye, EyeOff, CreditCard, CheckCircle2, X } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Alert, AlertDescription } from '@/shared/components/ui/alert';
-import { useAuth } from '../hooks/use-auth';
+import { useAuthContext } from '../contexts/auth-context';
 
 export default function RegisterForm() {
-    const { register, isLoading, error, setError } = useAuth();
+    const { register, isLoading: authLoading } = useAuthContext();
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -62,11 +66,15 @@ export default function RegisterForm() {
             return;
         }
 
+        setIsLoading(true);
         try {
             await register({ name: cpf, email, password, confirmPassword });
-            // TODO: redirect após cadastro
-        } catch {
-            // error is handled by useAuth
+            router.push('/marketplace');
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Erro ao criar conta';
+            setError(message);
+        } finally {
+            setIsLoading(false);
         }
     };
 

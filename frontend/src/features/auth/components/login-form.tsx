@@ -2,15 +2,19 @@
 
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowRight, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { useAuth } from '../hooks/use-auth';
+import { useAuthContext } from '../contexts/auth-context';
 
 export default function LoginForm() {
-    const { login, isLoading, error, setError } = useAuth();
+    const { login, isLoading: authLoading } = useAuthContext();
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -24,13 +28,18 @@ export default function LoginForm() {
             return;
         }
 
+        setIsLoading(true);
         try {
             await login({ email, password });
-            // TODO: redirect após login
-        } catch {
-            // error is handled by useAuth
+            router.push('/marketplace');
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Erro ao fazer login';
+            setError(message);
+        } finally {
+            setIsLoading(false);
         }
     };
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-primary/5 via-white to-accent flex items-center justify-center p-4">

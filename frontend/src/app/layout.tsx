@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { PwaInstallPrompt } from '@/shared/components/pwa-install-prompt';
+import { AuthWrapper } from '@/features/auth';
 
 export const metadata: Metadata = {
     title: 'Reforma+',
@@ -35,9 +36,12 @@ export default function RootLayout({
                 <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
             </head>
             <body>
-                {children}
+                <AuthWrapper>
+                    {children}
+                </AuthWrapper>
                 <PwaInstallPrompt />
             </body>
         </html>
     );
 }
+

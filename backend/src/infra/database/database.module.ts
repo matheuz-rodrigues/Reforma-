@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserOrmEntity } from './typeorm/entities/user.orm-entity';
+import { AdvertisementOrmEntity } from './typeorm/entities/advertisement.orm-entity';
+import { TypeormAdvertisementRepository } from './typeorm/repositories/typeorm-advertisement.repository';
 
 @Module({
     imports: [
@@ -11,11 +13,17 @@ import { UserOrmEntity } from './typeorm/entities/user.orm-entity';
             username: process.env.MYSQL_USER || 'reforma_user',
             password: process.env.MYSQL_PASSWORD || 'reforma_password',
             database: process.env.MYSQL_DATABASE || 'reforma_plus',
-            entities: [UserOrmEntity],
+            entities: [UserOrmEntity, AdvertisementOrmEntity],
             synchronize: true, // Desabilitar em produção
         }),
-        TypeOrmModule.forFeature([UserOrmEntity]),
+        TypeOrmModule.forFeature([UserOrmEntity, AdvertisementOrmEntity]),
     ],
-    exports: [TypeOrmModule],
+    providers: [
+        {
+            provide: 'IAdvertisementRepository',
+            useClass: TypeormAdvertisementRepository,
+        },
+    ],
+    exports: [TypeOrmModule, 'IAdvertisementRepository'],
 })
 export class DatabaseModule { }

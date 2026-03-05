@@ -41,11 +41,16 @@ export default function MarketplacePage() {
     const [advertisements, setAdvertisements] = useState<Advertisement[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const itemsPerPage = 6;
+
     const fetchAdvertisements = async () => {
         setIsLoading(true);
         try {
-            const data = await marketplaceService.getAdvertisements();
+            const { data, total } = await marketplaceService.getAdvertisements({ page: currentPage, limit: itemsPerPage });
             setAdvertisements(data);
+            setTotalPages(Math.ceil(total / itemsPerPage));
         } catch (error) {
             console.error('Failed to fetch advertisements:', error);
         } finally {
@@ -55,7 +60,7 @@ export default function MarketplacePage() {
 
     useEffect(() => {
         fetchAdvertisements();
-    }, []);
+    }, [currentPage]);
 
     return (
         <div className="min-h-screen bg-gray-50 pt-2 pb-8">
@@ -267,26 +272,54 @@ export default function MarketplacePage() {
                                                 </div>
                                             </CardContent>
 
-                                            <CardFooter className="grid grid-cols-2 gap-2">
-                                                <Button variant="outline">
-                                                    <MessageCircle className="mr-2 h-4 w-4" />
-                                                    Mensagem
+                                            <div className="p-6 pt-0 flex gap-2">
+                                                <Link href={`/marketplace/${listing.id}`} className="flex-1">
+                                                    <Button className="w-full">
+                                                        Ver Detalhes
+                                                    </Button>
+                                                </Link>
+                                                <Button variant="outline" size="icon">
+                                                    <MessageCircle className="h-4 w-4" />
                                                 </Button>
-                                                <Button>Ver Detalhes</Button>
-                                            </CardFooter>
+                                            </div>
                                         </Card>
                                     ))}
                                 </div>
                             )}
 
                             {/* Pagination */}
-                            <div className="flex justify-center gap-2 mt-8">
-                                <Button variant="outline" size="sm">Anterior</Button>
-                                <Button variant="outline" size="sm">1</Button>
-                                <Button size="sm">2</Button>
-                                <Button variant="outline" size="sm">3</Button>
-                                <Button variant="outline" size="sm">Próximo</Button>
-                            </div>
+                            {totalPages > 1 && (
+                                <div className="flex justify-center flex-wrap gap-2 mt-8">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                        disabled={currentPage === 1}
+                                    >
+                                        Anterior
+                                    </Button>
+
+                                    {Array.from({ length: totalPages }).map((_, i) => (
+                                        <Button
+                                            key={i}
+                                            variant={currentPage === i + 1 ? "default" : "outline"}
+                                            size="sm"
+                                            onClick={() => setCurrentPage(i + 1)}
+                                        >
+                                            {i + 1}
+                                        </Button>
+                                    ))}
+
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                        disabled={currentPage === totalPages}
+                                    >
+                                        Próximo
+                                    </Button>
+                                </div>
+                            )}
                         </TabsContent>
                     </Tabs>
                 </div>

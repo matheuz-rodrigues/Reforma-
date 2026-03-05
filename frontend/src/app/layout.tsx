@@ -25,6 +25,8 @@ export const viewport: Viewport = {
     userScalable: false,
 };
 
+import { Toaster } from 'sonner';
+
 export default function RootLayout({
     children,
 }: {
@@ -40,6 +42,7 @@ export default function RootLayout({
                     {children}
                 </AuthWrapper>
                 <PwaInstallPrompt />
+                <Toaster richColors position="bottom-right" />
             </body>
         </html>
     );

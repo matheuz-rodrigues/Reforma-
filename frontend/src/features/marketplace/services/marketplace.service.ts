@@ -28,11 +28,19 @@ export interface CreateAdvertisementDTO {
 }
 
 export const marketplaceService = {
-    async getAdvertisements(filters?: { category?: string; status?: string }): Promise<Advertisement[]> {
-        return apiClient.get<Advertisement[]>('/advertisements', { body: filters }); // TODO: API Client doesn't have a params option, passing in body might not work for GET. Let's cast to any for now or modify API client
+    async getAdvertisements(filters?: { category?: string; status?: string; page?: number; limit?: number }): Promise<{ data: Advertisement[], total: number }> {
+        return apiClient.get<{ data: Advertisement[], total: number }>('/advertisements', { params: filters });
     },
 
     async createAdvertisement(data: CreateAdvertisementDTO | FormData): Promise<Advertisement> {
         return apiClient.post<Advertisement>('/advertisements', data);
+    },
+
+    async getAdvertisementById(id: string): Promise<Advertisement> {
+        return apiClient.get<Advertisement>(`/advertisements/${id}`);
+    },
+
+    async deleteAdvertisement(id: string): Promise<void> {
+        return apiClient.delete(`/advertisements/${id}`);
     },
 };

@@ -5,6 +5,7 @@ type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 interface RequestOptions {
     headers?: Record<string, string>;
     body?: unknown;
+    params?: Record<string, string | number | boolean | undefined>;
 }
 
 class ApiClient {
@@ -20,8 +21,20 @@ class ApiClient {
         return token ? { Authorization: `Bearer ${token}` } : {};
     }
 
+    private buildUrl(path: string, params?: Record<string, string | number | boolean | undefined>): string {
+        const url = new URL(`${this.baseUrl}${path}`);
+        if (params) {
+            Object.entries(params).forEach(([key, value]) => {
+                if (value !== undefined) {
+                    url.searchParams.append(key, String(value));
+                }
+            });
+        }
+        return url.toString();
+    }
+
     private async request<T>(method: HttpMethod, path: string, options?: RequestOptions): Promise<T> {
-        const url = `${this.baseUrl}${path}`;
+        const url = this.buildUrl(path, options?.params);
         const isFormData = options?.body instanceof FormData;
 
         const headers: Record<string, string> = {
@@ -44,7 +57,8 @@ class ApiClient {
             throw new Error(error.message || `Erro ${response.status}`);
         }
 
-        return response.json();
+        const text = await response.text();
+        return text ? JSON.parse(text) : ({} as T);
     }
 
     get<T>(path: string, options?: RequestOptions) {

@@ -1,9 +1,11 @@
-import { Controller, Post, Body, Get, Query, UseGuards, Request, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, UseGuards, Request, UseInterceptors, UploadedFiles, Param, Delete } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { CreateAdvertisementUseCase } from '../../../application/marketplace/use-cases/create-advertisement.use-case';
 import { ListAdvertisementsUseCase } from '../../../application/marketplace/use-cases/list-advertisements.use-case';
+import { GetAdvertisementUseCase } from '../../../application/marketplace/use-cases/get-advertisement.use-case';
+import { DeleteAdvertisementUseCase } from '../../../application/marketplace/use-cases/delete-advertisement.use-case';
 import { CreateAdvertisementDto } from '../dtos/create-advertisement.dto';
 import { JwtAuthGuard } from '../../../infra/security/jwt/jwt.guard';
 
@@ -12,6 +14,8 @@ export class AdvertisementController {
     constructor(
         private readonly createAdvertisementUseCase: CreateAdvertisementUseCase,
         private readonly listAdvertisementsUseCase: ListAdvertisementsUseCase,
+        private readonly getAdvertisementUseCase: GetAdvertisementUseCase,
+        private readonly deleteAdvertisementUseCase: DeleteAdvertisementUseCase,
     ) { }
 
     @UseGuards(JwtAuthGuard)
@@ -46,7 +50,25 @@ export class AdvertisementController {
     async findAll(
         @Query('category') category?: string,
         @Query('status') status?: string,
+        @Query('page') page?: string,
+        @Query('limit') limit?: string,
     ) {
-        return this.listAdvertisementsUseCase.execute({ category, status });
+        return this.listAdvertisementsUseCase.execute({
+            category,
+            status,
+            page: page ? parseInt(page, 10) : undefined,
+            limit: limit ? parseInt(limit, 10) : undefined,
+        });
+    }
+
+    @Get(':id')
+    async findOne(@Param('id') id: string) {
+        return this.getAdvertisementUseCase.execute(id);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Delete(':id')
+    async remove(@Param('id') id: string, @Request() req) {
+        return this.deleteAdvertisementUseCase.execute(id, req.user.id);
     }
 }

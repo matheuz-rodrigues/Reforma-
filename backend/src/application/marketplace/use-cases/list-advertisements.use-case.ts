@@ -5,6 +5,8 @@ import { AdvertisementEntity } from '../../../domain/marketplace/entities/advert
 interface ListAdvertisementsParams {
     category?: string;
     status?: string;
+    page?: number;
+    limit?: number;
 }
 
 @Injectable()
@@ -14,7 +16,7 @@ export class ListAdvertisementsUseCase {
         private readonly advertisementRepository: IAdvertisementRepository,
     ) { }
 
-    async execute(params?: ListAdvertisementsParams): Promise<AdvertisementEntity[]> {
+    async execute(params?: ListAdvertisementsParams): Promise<{ data: AdvertisementEntity[], total: number }> {
         return this.advertisementRepository.findAll(params);
     }
 }

@@ -54,7 +54,7 @@ export class TypeormAdvertisementRepository implements IAdvertisementRepository 
         return this.toDomain(entity);
     }
 
-    async findAll(filters?: { category?: string; status?: string }): Promise<AdvertisementEntity[]> {
+    async findAll(filters?: { category?: string; status?: string; page?: number; limit?: number }): Promise<{ data: AdvertisementEntity[], total: number }> {
         const query = this.repository.createQueryBuilder('adv');
 
         if (filters?.category) {
@@ -70,8 +70,13 @@ export class TypeormAdvertisementRepository implements IAdvertisementRepository 
 
         query.orderBy('adv.createdAt', 'DESC');
 
-        const entities = await query.getMany();
-        return entities.map(this.toDomain);
+        if (filters?.page && filters?.limit) {
+            const skip = (filters.page - 1) * filters.limit;
+            query.skip(skip).take(filters.limit);
+        }
+
+        const [entities, total] = await query.getManyAndCount();
+        return { data: entities.map(this.toDomain), total };
     }
 
     async update(id: string, data: Partial<AdvertisementEntity>): Promise<AdvertisementEntity> {

@@ -34,6 +34,12 @@ export class TypeormAuthRepository implements IAuthRepository {
         return { id: user.id, name: user.name, email: user.email };
     }
 
+    async findById(id: string): Promise<{ id: string; name: string; email: string } | null> {
+        const user = await this.userRepo.findOne({ where: { id } });
+        if (!user) return null;
+        return { id: user.id, name: user.name, email: user.email };
+    }
+
     async generateTokens(userId: string): Promise<AuthTokens> {
         const payload = { sub: userId };
 

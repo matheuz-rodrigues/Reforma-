@@ -1,4 +1,5 @@
 import { IsString, IsNotEmpty, IsNumber, IsOptional, IsEnum, IsArray } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateAdvertisementDto {
     @IsString()
@@ -11,10 +12,12 @@ export class CreateAdvertisementDto {
 
     @IsNumber()
     @IsNotEmpty()
+    @Type(() => Number)
     price: number;
 
     @IsNumber()
     @IsOptional()
+    @Type(() => Number)
     originalPrice?: number;
 
     @IsString()
@@ -27,8 +30,8 @@ export class CreateAdvertisementDto {
 
     @IsArray()
     @IsString({ each: true })
-    @IsNotEmpty()
-    images: string[];
+    @IsOptional()
+    images?: string[];
 
     @IsString()
     @IsOptional()

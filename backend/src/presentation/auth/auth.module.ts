@@ -4,6 +4,7 @@ import { AuthController } from './auth.controller';
 import { LoginUseCase } from '../../application/auth/use-cases/login.use-case';
 import { RegisterUseCase } from '../../application/auth/use-cases/register.use-case';
 import { RefreshTokenUseCase } from '../../application/auth/use-cases/refresh-token.use-case';
+import { GetProfileUseCase } from '../../application/auth/use-cases/get-profile.use-case';
 import { TypeormUserRepository } from '../../infra/database/typeorm/repositories/typeorm-user.repository';
 import { TypeormAuthRepository } from '../../infra/database/typeorm/repositories/typeorm-auth.repository';
 import { BcryptService } from '../../infra/security/bcrypt/bcrypt.service';
@@ -22,6 +23,7 @@ import { AUTH_REPOSITORY, USER_REPOSITORY, HASH_SERVICE } from '../../shared/con
         LoginUseCase,
         RegisterUseCase,
         RefreshTokenUseCase,
+        GetProfileUseCase,
 
         // Repository bindings (Interface -> Implementation)
         {

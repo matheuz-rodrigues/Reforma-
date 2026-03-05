@@ -22,15 +22,21 @@ class ApiClient {
 
     private async request<T>(method: HttpMethod, path: string, options?: RequestOptions): Promise<T> {
         const url = `${this.baseUrl}${path}`;
+        const isFormData = options?.body instanceof FormData;
+
+        const headers: Record<string, string> = {
+            ...this.getAuthHeaders(),
+            ...options?.headers,
+        };
+
+        if (!isFormData) {
+            headers['Content-Type'] = 'application/json';
+        }
 
         const response = await fetch(url, {
             method,
-            headers: {
-                'Content-Type': 'application/json',
-                ...this.getAuthHeaders(),
-                ...options?.headers,
-            },
-            body: options?.body ? JSON.stringify(options.body) : undefined,
+            headers,
+            body: isFormData ? (options?.body as FormData) : (options?.body ? JSON.stringify(options.body) : undefined),
         });
 
         if (!response.ok) {

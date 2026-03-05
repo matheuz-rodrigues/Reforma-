@@ -1,14 +1,20 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 import { AppModule } from './app.module';
 import { DomainExceptionFilter } from './shared/filters/domain-exception.filter';
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+    // Servir arquivos estáticos (fotos dos produtos)
+    app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+        prefix: '/uploads/',
+    });
 
     // Prefixo global para todas as rotas: /api
 
-    // Habilitar CORS
     app.enableCors();
 
     // Pipe de validação global (class-validator)

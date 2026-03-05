@@ -22,6 +22,7 @@ export class TypeormAdvertisementRepository implements IAdvertisementRepository 
             category: ormEntity.category,
             condition: ormEntity.condition,
             sellerId: ormEntity.sellerId,
+            sellerName: ormEntity.seller?.name,
             status: ormEntity.status,
             images: ormEntity.images,
             location: ormEntity.location,
@@ -59,7 +60,8 @@ export class TypeormAdvertisementRepository implements IAdvertisementRepository 
     }
 
     async findAll(filters?: { category?: string; status?: string; page?: number; limit?: number }): Promise<{ data: AdvertisementEntity[], total: number }> {
-        const query = this.repository.createQueryBuilder('adv');
+        const query = this.repository.createQueryBuilder('adv')
+            .leftJoinAndSelect('adv.seller', 'seller');
 
         if (filters?.category) {
             query.andWhere('adv.category = :category', { category: filters.category });
@@ -80,7 +82,7 @@ export class TypeormAdvertisementRepository implements IAdvertisementRepository 
         }
 
         const [entities, total] = await query.getManyAndCount();
-        return { data: entities.map(this.toDomain), total };
+        return { data: entities.map(e => this.toDomain(e)), total };
     }
 
     async update(id: string, data: Partial<AdvertisementEntity>): Promise<AdvertisementEntity> {

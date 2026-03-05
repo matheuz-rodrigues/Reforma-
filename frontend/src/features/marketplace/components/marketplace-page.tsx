@@ -301,7 +301,6 @@ export default function MarketplacePage() {
                                         <Card key={listing.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                                             <div className="relative">
                                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                                 <img
                                                     src={listing.images?.[0]
                                                         ? (listing.images[0].startsWith('http') ? listing.images[0] : `${env.API_URL}${listing.images[0]}`)
@@ -362,10 +361,10 @@ export default function MarketplacePage() {
 
                                                 <div className="flex items-center gap-2 pt-2 border-t">
                                                     <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary">
-                                                        {listing.sellerId?.charAt(0).toUpperCase() || 'U'}
+                                                        {listing.sellerName?.charAt(0).toUpperCase() || 'V'}
                                                     </div>
                                                     <div className="flex-1">
-                                                        <p className="text-sm font-medium">Usuário {listing.sellerId?.substring(0, 5) || 'Anônimo'}</p>
+                                                        <p className="text-sm font-medium">{listing.sellerName || 'Vendedor'}</p>
                                                         <div className="flex items-center gap-1">
                                                             <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                                                             <span className="text-xs text-muted-foreground">4.8</span>

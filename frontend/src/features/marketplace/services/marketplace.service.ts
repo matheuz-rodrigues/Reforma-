@@ -9,6 +9,7 @@ export interface Advertisement {
     category: string;
     condition: 'novo' | 'usado' | 'sobra';
     sellerId: string;
+    sellerName?: string;
     status: 'ativo' | 'inativo' | 'vendido';
     images: string[];
     location?: string;

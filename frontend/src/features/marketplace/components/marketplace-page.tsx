@@ -22,6 +22,8 @@ import {
     FileText,
     User,
     ArrowRight,
+    Navigation,
+    Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -44,6 +46,55 @@ export default function MarketplacePage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const itemsPerPage = 6;
+
+    const [userLocation, setUserLocation] = useState<{ lat: number, lng: number } | null>(null);
+    const [locationInput, setLocationInput] = useState('');
+    const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
+    const [isGettingLocation, setIsGettingLocation] = useState(false);
+
+    const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+        const R = 6371; // Radius of the Earth in km
+        const dLat = (lat2 - lat1) * (Math.PI / 180);
+        const dLon = (lon2 - lon1) * (Math.PI / 180);
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    };
+
+    const handleSearchLocation = async () => {
+        if (!locationInput || locationInput.trim().length < 3) {
+            alert('Digite o nome da sua cidade ou bairro para calcular distâncias.');
+            return;
+        }
+
+        setIsGettingLocation(true);
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(locationInput)}&format=json&limit=5`);
+            const data = await response.json();
+
+            if (data && data.length > 0) {
+                setLocationSuggestions(data);
+            } else {
+                alert('Localização não encontrada. Tente digitar de outra forma (ex: Nome do Bairro, Cidade).');
+                setLocationSuggestions([]);
+            }
+        } catch (error) {
+            console.error('Erro ao buscar localização:', error);
+            alert('Erro ao buscar a localização. Tente novamente mais tarde.');
+            setLocationSuggestions([]);
+        } finally {
+            setIsGettingLocation(false);
+        }
+    };
+
+    const handleSelectLocation = (result: any) => {
+        setUserLocation({ lat: parseFloat(result.lat), lng: parseFloat(result.lon) });
+        setLocationInput(result.display_name.split(',').slice(0, 2).join(', '));
+        setLocationSuggestions([]);
+    };
 
     const fetchAdvertisements = async () => {
         setIsLoading(true);
@@ -106,8 +157,9 @@ export default function MarketplacePage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="md:col-span-1">
-                        <Button variant="outline" size="lg" className="w-full h-full min-h-[56px]">
-                            Minhas Compras
+                        <Button variant="outline" size="lg" className="w-full h-full min-h-[56px] text-lg font-bold">
+                            <ShoppingBag className="mr-3 h-6 w-6" />
+                            Meu Carrinho
                         </Button>
                     </div>
                     <div className="md:col-span-3">
@@ -124,11 +176,55 @@ export default function MarketplacePage() {
                 <Card>
                     <CardContent className="pt-6">
                         <div className="grid md:grid-cols-4 gap-4">
-                            <div className="md:col-span-2">
-                                <div className="relative">
+                            <div className="md:col-span-2 flex gap-2">
+                                <div className="relative flex-1">
                                     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                     <Input placeholder="Buscar materiais..." className="pl-10" />
                                 </div>
+                                <div className="relative flex-1 hidden sm:block">
+                                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Sua cidade (ex: São Paulo)"
+                                        className="pl-10"
+                                        value={locationInput}
+                                        onChange={(e) => {
+                                            setLocationInput(e.target.value);
+                                            if (locationSuggestions.length > 0) setLocationSuggestions([]);
+                                        }}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                handleSearchLocation();
+                                            }
+                                        }}
+                                    />
+                                    {locationSuggestions.length > 0 && (
+                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto">
+                                            {locationSuggestions.map((item: any, index: number) => (
+                                                <button
+                                                    key={index}
+                                                    className="w-full text-left px-4 py-2 text-sm hover:bg-muted transition-colors border-b last:border-b-0"
+                                                    onClick={() => handleSelectLocation(item)}
+                                                >
+                                                    {item.display_name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                                <Button
+                                    variant={userLocation ? "default" : "outline"}
+                                    onClick={handleSearchLocation}
+                                    disabled={isGettingLocation || !locationInput}
+                                    title="Buscar minha localização aproximada"
+                                    className="px-3"
+                                >
+                                    {isGettingLocation ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                        <Search className={`h-4 w-4 ${userLocation ? 'text-white' : ''}`} />
+                                    )}
+                                </Button>
                             </div>
 
                             <Select defaultValue="all">
@@ -209,7 +305,7 @@ export default function MarketplacePage() {
                                                 <img
                                                     src={listing.images?.[0]
                                                         ? (listing.images[0].startsWith('http') ? listing.images[0] : `${env.API_URL}${listing.images[0]}`)
-                                                        : 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=400&h=300&fit=crop'}
+                                                        : 'https://images.unsplash.com/photo-1504307651254-35680f356f58?w=400&h=300&fit=crop'}
                                                     alt={listing.title}
                                                     className="w-full h-48 object-cover"
                                                 />
@@ -247,11 +343,17 @@ export default function MarketplacePage() {
                                                     </span>
                                                 </div>
 
-                                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                                <div className="flex flex-col gap-1.5 text-sm text-muted-foreground">
                                                     <div className="flex items-center gap-1">
                                                         <MapPin className="h-4 w-4" />
                                                         {listing.location || 'Localização não informada'}
                                                     </div>
+                                                    {userLocation && listing.latitude && listing.longitude && (
+                                                        <div className="flex items-center gap-1 text-primary font-medium text-xs bg-primary/10 w-fit px-2 py-0.5 rounded-full">
+                                                            <Navigation className="h-3 w-3" />
+                                                            A {calculateDistance(userLocation.lat, userLocation.lng, listing.latitude, listing.longitude).toFixed(1)} km de você
+                                                        </div>
+                                                    )}
                                                     <div className="flex items-center gap-1">
                                                         <Clock className="h-4 w-4" />
                                                         {new Date(listing.createdAt || Date.now()).toLocaleDateString()}

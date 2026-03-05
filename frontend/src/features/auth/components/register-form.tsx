@@ -3,7 +3,7 @@
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Mail, Lock, Eye, EyeOff, CreditCard, CheckCircle2, X } from 'lucide-react';
+import { ArrowRight, Mail, Lock, Eye, EyeOff, CreditCard, CheckCircle2, X, User } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
@@ -19,6 +19,7 @@ export default function RegisterForm() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    const [name, setName] = useState('');
     const [cpf, setCpf] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -68,7 +69,7 @@ export default function RegisterForm() {
 
         setIsLoading(true);
         try {
-            await register({ name: cpf, email, password, confirmPassword });
+            await register({ name, email, password, confirmPassword });
             router.push('/marketplace');
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Erro ao criar conta';
@@ -113,6 +114,23 @@ export default function RegisterForm() {
                         )}
 
                         <form onSubmit={handleSubmit} className="space-y-4">
+                            {/* Nome */}
+                            <div className="space-y-2">
+                                <Label htmlFor="name">Nome Completo</Label>
+                                <div className="relative">
+                                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        id="name"
+                                        type="text"
+                                        placeholder="Seu nome completo"
+                                        className="pl-9"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
                             {/* CPF */}
                             <div className="space-y-2">
                                 <Label htmlFor="cpf">CPF</Label>

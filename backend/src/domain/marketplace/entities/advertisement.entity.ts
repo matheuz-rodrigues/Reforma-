@@ -10,6 +10,8 @@ export interface AdvertisementEntity {
     status: 'ativo' | 'inativo' | 'vendido';
     images: string[];
     location?: string;
+    latitude?: number;
+    longitude?: number;
     createdAt: Date;
     updatedAt: Date;
 }

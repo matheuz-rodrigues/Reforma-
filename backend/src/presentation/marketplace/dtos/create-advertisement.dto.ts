@@ -36,4 +36,14 @@ export class CreateAdvertisementDto {
     @IsString()
     @IsOptional()
     location?: string;
+
+    @IsNumber()
+    @IsOptional()
+    @Type(() => Number)
+    latitude?: number;
+
+    @IsNumber()
+    @IsOptional()
+    @Type(() => Number)
+    longitude?: number;
 }

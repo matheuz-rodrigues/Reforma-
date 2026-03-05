@@ -39,8 +39,8 @@ export function Navigation() {
                             </AvatarFallback>
                         </Avatar>
                         <div className="hidden md:block text-left mr-1">
-                            <p className="text-xs font-bold leading-none">{user.email}</p>
-                            <p className="text-[10px] text-muted-foreground leading-none mt-1">Ver perfil</p>
+                            <p className="text-xs font-bold leading-none">{user.name}</p>
+                            <p className="text-[10px] text-muted-foreground leading-none mt-1 text-ellipsis overflow-hidden max-w-[150px]">{user.email}</p>
                         </div>
                         <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isMenuOpen ? 'rotate-180' : ''}`} />
                     </button>

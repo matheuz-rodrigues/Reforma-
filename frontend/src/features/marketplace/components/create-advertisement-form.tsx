@@ -6,7 +6,7 @@ import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
 import { Textarea } from '@/shared/components/ui/textarea';
-import { Camera, X } from 'lucide-react';
+import { Camera, X, MapPin, Loader2, Search } from 'lucide-react';
 import { marketplaceService } from '../services/marketplace.service';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/shared/components/ui/card';
@@ -19,6 +19,8 @@ interface FormData {
     category: string;
     condition: 'novo' | 'usado' | 'sobra';
     location: string;
+    latitude?: string;
+    longitude?: string;
 }
 
 interface FormErrors {
@@ -26,11 +28,13 @@ interface FormErrors {
     description?: string;
     price?: string;
     category?: string;
+    photos?: string;
 }
 
 export function CreateAdvertisementForm() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
+    const [isGettingLocation, setIsGettingLocation] = useState(false);
     const [errors, setErrors] = useState<FormErrors>({});
     const [formData, setFormData] = useState<FormData>({
         title: '',
@@ -43,10 +47,12 @@ export function CreateAdvertisementForm() {
     });
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [previews, setPreviews] = useState<string[]>([]);
+    const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     function validate(): boolean {
         const newErrors: FormErrors = {};
+        if (selectedFiles.length === 0) newErrors.photos = 'Adicione pelo menos uma foto do produto';
         if (!formData.title || formData.title.length < 5) newErrors.title = 'O título deve ter no mínimo 5 caracteres';
         if (!formData.description || formData.description.length < 10) newErrors.description = 'A descrição deve ter no mínimo 10 caracteres';
         if (!formData.price || Number(formData.price) <= 0) newErrors.price = 'Informe um preço válido';
@@ -80,6 +86,42 @@ export function CreateAdvertisementForm() {
         });
     }
 
+    async function handleSearchLocation() {
+        if (!formData.location || formData.location.trim().length < 3) {
+            alert('Digite o nome da cidade ou bairro no campo ao lado para buscar no mapa.');
+            return;
+        }
+
+        setIsGettingLocation(true);
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(formData.location)}&format=json&limit=5`);
+            const data = await response.json();
+
+            if (data && data.length > 0) {
+                setLocationSuggestions(data);
+            } else {
+                alert('Localização não encontrada. Tente digitar de outra forma (ex: Nome do Bairro, Cidade).');
+                setLocationSuggestions([]);
+            }
+        } catch (error) {
+            console.error('Erro ao buscar localização:', error);
+            alert('Erro ao buscar a localização. Tente novamente mais tarde.');
+            setLocationSuggestions([]);
+        } finally {
+            setIsGettingLocation(false);
+        }
+    }
+
+    const handleSelectLocation = (result: any) => {
+        setFormData(prev => ({
+            ...prev,
+            latitude: result.lat,
+            longitude: result.lon,
+            location: result.display_name.split(',').slice(0, 3).join(', ')
+        }));
+        setLocationSuggestions([]);
+    };
+
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         if (!validate()) return;
@@ -94,6 +136,8 @@ export function CreateAdvertisementForm() {
             data.append('category', formData.category);
             data.append('condition', formData.condition);
             if (formData.location) data.append('location', formData.location);
+            if (formData.latitude) data.append('latitude', formData.latitude);
+            if (formData.longitude) data.append('longitude', formData.longitude);
 
             selectedFiles.forEach(file => {
                 data.append('files', file);
@@ -157,6 +201,7 @@ export function CreateAdvertisementForm() {
                             multiple
                             className="hidden"
                         />
+                        {errors.photos && <p className="text-sm text-red-500 mt-1">{errors.photos}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -223,9 +268,71 @@ export function CreateAdvertisementForm() {
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="location">Localização (Opcional)</Label>
-                        <Input id="location" name="location" placeholder="Ex: São Paulo, SP" value={formData.location} onChange={handleChange} className="h-12" />
+                    <div className="space-y-3 p-4 bg-muted/30 rounded-lg border border-border/50">
+                        <Label htmlFor="location" className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4 text-primary" />
+                            Localização do Material
+                        </Label>
+                        <div className="flex gap-2">
+                            <div className="relative flex-1">
+                                <Input
+                                    id="location"
+                                    name="location"
+                                    placeholder="Ex: São Paulo, SP"
+                                    value={formData.location}
+                                    onChange={(e) => {
+                                        handleChange(e);
+                                        if (locationSuggestions.length > 0) setLocationSuggestions([]);
+                                    }}
+                                    className="h-12 w-full"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            handleSearchLocation();
+                                        }
+                                    }}
+                                />
+                                {locationSuggestions.length > 0 && (
+                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto">
+                                        {locationSuggestions.map((item: any, index: number) => (
+                                            <button
+                                                type="button"
+                                                key={index}
+                                                className="w-full text-left px-4 py-2 text-sm hover:bg-muted transition-colors border-b last:border-b-0"
+                                                onClick={() => handleSelectLocation(item)}
+                                            >
+                                                {item.display_name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                className="h-12 px-4 flex items-center gap-2 whitespace-nowrap"
+                                onClick={handleSearchLocation}
+                                disabled={isGettingLocation || !formData.location}
+                            >
+                                {isGettingLocation ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        Buscando...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Search className="h-4 w-4" />
+                                        Buscar no Mapa
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                        {formData.latitude && formData.longitude && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                <span className="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
+                                Localização aproximada encontrada! O comprador verá uma estimativa de distância.
+                            </p>
+                        )}
                     </div>
                 </CardContent>
 

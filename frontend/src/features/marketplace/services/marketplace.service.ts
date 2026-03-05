@@ -12,6 +12,8 @@ export interface Advertisement {
     status: 'ativo' | 'inativo' | 'vendido';
     images: string[];
     location?: string;
+    latitude?: number;
+    longitude?: number;
     createdAt: string;
     updatedAt: string;
 }
@@ -25,6 +27,8 @@ export interface CreateAdvertisementDTO {
     condition: 'novo' | 'usado' | 'sobra';
     images: string[];
     location?: string;
+    latitude?: number;
+    longitude?: number;
 }
 
 export const marketplaceService = {

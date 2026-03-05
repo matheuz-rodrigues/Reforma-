@@ -1,3 +1,8 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuthContext } from '@/features/auth';
 import Link from 'next/link';
 import { Button } from '@/shared/components/ui/button';
 import { Card } from '@/shared/components/ui/card';
@@ -32,6 +37,24 @@ const benefits = [
 ];
 
 export default function HomePage() {
+    const { isAuthenticated, isLoading } = useAuthContext();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!isLoading && isAuthenticated) {
+            router.replace('/marketplace');
+        }
+    }, [isAuthenticated, isLoading, router]);
+
+    // Opcional: mostrar um loader ou nada enquanto verifica a autenticação para evitar um flash da página inicial
+    if (isLoading || isAuthenticated) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen">
             {/* Hero Section */}

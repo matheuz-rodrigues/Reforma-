@@ -25,6 +25,8 @@ export class TypeormAdvertisementRepository implements IAdvertisementRepository 
             status: ormEntity.status,
             images: ormEntity.images,
             location: ormEntity.location,
+            latitude: ormEntity.latitude ? Number(ormEntity.latitude) : undefined,
+            longitude: ormEntity.longitude ? Number(ormEntity.longitude) : undefined,
             createdAt: ormEntity.createdAt,
             updatedAt: ormEntity.updatedAt,
         };
@@ -42,6 +44,8 @@ export class TypeormAdvertisementRepository implements IAdvertisementRepository 
             status: data.status,
             images: data.images,
             location: data.location,
+            latitude: data.latitude,
+            longitude: data.longitude,
         });
 
         const saved = await this.repository.save(entity);

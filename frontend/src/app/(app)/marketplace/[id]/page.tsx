@@ -102,7 +102,7 @@ export default function AdvertisementDetailPage() {
 
     const images = advertisement.images && advertisement.images.length > 0
         ? advertisement.images.map((img: string) => img.startsWith('http') ? img : `${env.API_URL}${img}`)
-        : ['https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800&h=600&fit=crop'];
+        : ['https://images.unsplash.com/photo-1504307651254-35680f356f58?w=800&h=600&fit=crop'];
 
     const discount = advertisement.originalPrice
         ? Math.round((1 - advertisement.price / advertisement.originalPrice) * 100)

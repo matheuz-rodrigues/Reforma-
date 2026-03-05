@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Query, UseGuards, Request, UseInterceptors, UploadedFiles, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, UseGuards, Request, UseInterceptors, UploadedFiles, Param, Delete, BadRequestException } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
@@ -34,10 +34,14 @@ export class AdvertisementController {
         @Body() createDto: CreateAdvertisementDto,
         @Request() req
     ) {
+        if (!files || files.length === 0) {
+            throw new BadRequestException('É obrigatório enviar pelo menos uma foto do produto.');
+        }
+
         // req.user is set by the JwtAuthGuard
         const sellerId = req.user.id;
 
-        const imageUrls = files?.map(file => `/uploads/${file.filename}`) || [];
+        const imageUrls = files.map(file => `/uploads/${file.filename}`);
 
         return this.createAdvertisementUseCase.execute({
             ...createDto,

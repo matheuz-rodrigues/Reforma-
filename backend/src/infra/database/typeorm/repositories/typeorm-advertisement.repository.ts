@@ -54,7 +54,10 @@ export class TypeormAdvertisementRepository implements IAdvertisementRepository 
     }
 
     async findById(id: string): Promise<AdvertisementEntity | null> {
-        const entity = await this.repository.findOne({ where: { id } });
+        const entity = await this.repository.findOne({
+            where: { id },
+            relations: ['seller']
+        });
         if (!entity) return null;
         return this.toDomain(entity);
     }

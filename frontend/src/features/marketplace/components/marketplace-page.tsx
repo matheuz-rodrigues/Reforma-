@@ -29,6 +29,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { marketplaceService, Advertisement } from '../services/marketplace.service';
 import env from '@/infra/config/env';
+import { useChatContext } from '@/features/chat/contexts/chat-context';
 
 const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: Home, description: 'Visão geral da obra' },
@@ -39,6 +40,7 @@ const navItems = [
 
 export default function MarketplacePage() {
     const pathname = usePathname();
+    const { openChat } = useChatContext();
     const [activeTab, setActiveTab] = useState('all');
     const [advertisements, setAdvertisements] = useState<Advertisement[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -379,7 +381,12 @@ export default function MarketplacePage() {
                                                         Ver Detalhes
                                                     </Button>
                                                 </Link>
-                                                <Button variant="outline" size="icon">
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    title="Enviar mensagem ao vendedor"
+                                                    onClick={() => openChat(listing.sellerId, listing.sellerName || 'Vendedor')}
+                                                >
                                                     <MessageCircle className="h-4 w-4" />
                                                 </Button>
                                             </div>

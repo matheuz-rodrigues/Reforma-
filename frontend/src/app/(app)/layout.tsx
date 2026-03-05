@@ -2,6 +2,7 @@
 
 import { Navigation } from '@/shared/components/navigation';
 import { ProtectedRoute } from '@/features/auth';
+import { ChatWrapper } from '@/features/chat/components/ChatWrapper';
 
 export default function AppLayout({
     children,
@@ -10,8 +11,11 @@ export default function AppLayout({
 }) {
     return (
         <ProtectedRoute>
-            <Navigation />
-            {children}
+            <ChatWrapper>
+                <Navigation />
+                {children}
+            </ChatWrapper>
         </ProtectedRoute>
     );
 }
+

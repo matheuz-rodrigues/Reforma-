@@ -1,4 +1,4 @@
-'use client';
+x'use client';
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -10,10 +10,12 @@ import { ArrowLeft, MapPin, Tag, Package, Calendar, Share2, Heart, MessageCircle
 import env from '@/infra/config/env';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { useChatContext } from '@/features/chat/contexts/chat-context';
 
 export default function AdvertisementDetailPage() {
     const { id } = useParams();
     const router = useRouter();
+    const { openChat } = useChatContext();
     const [advertisement, setAdvertisement] = useState<Advertisement | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -193,7 +195,11 @@ export default function AdvertisementDetailPage() {
                                 </div>
 
                                 <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    <Button size="lg" className="w-full h-14 text-lg font-bold">
+                                    <Button
+                                        size="lg"
+                                        className="w-full h-14 text-lg font-bold"
+                                        onClick={() => openChat(advertisement.sellerId, advertisement.sellerName || 'Vendedor')}
+                                    >
                                         <MessageCircle className="mr-2 h-5 w-5" />
                                         Falar com Vendedor
                                     </Button>
@@ -218,12 +224,12 @@ export default function AdvertisementDetailPage() {
                         <div className="pt-6 border-t">
                             <div className="flex items-center justify-between p-4 bg-gray-100 rounded-xl">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
-                                        M
+                                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xl uppercase">
+                                        {(advertisement.sellerName || 'V').charAt(0)}
                                     </div>
                                     <div>
-                                        <p className="font-bold">Matheus Rodrigues</p>
-                                        <p className="text-sm text-muted-foreground px">Vendedor verificado 5.0 ★ </p>
+                                        <p className="font-bold">{advertisement.sellerName || 'Vendedor'}</p>
+                                        <p className="text-sm text-muted-foreground">Vendedor na plataforma</p>
                                     </div>
                                 </div>
                                 <Button variant="link" className="font-bold">Ver Perfil</Button>

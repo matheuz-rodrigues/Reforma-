@@ -16,7 +16,7 @@ export class AdvertisementController {
 
     @UseGuards(JwtAuthGuard)
     @Post()
-    @UseInterceptors(FilesInterceptor('files', 5, {
+    @UseInterceptors(FilesInterceptor('files', 10, {
         storage: diskStorage({
             destination: './uploads',
             filename: (req, file, cb) => {

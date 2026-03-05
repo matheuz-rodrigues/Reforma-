@@ -25,7 +25,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { CreateAdvertisementDialog } from './create-advertisement-dialog';
 import { marketplaceService, Advertisement } from '../services/marketplace.service';
 import env from '@/infra/config/env';
 
@@ -107,10 +106,12 @@ export default function MarketplacePage() {
                         </Button>
                     </div>
                     <div className="md:col-span-3">
-                        <CreateAdvertisementDialog onSuccess={() => {
-                            // Fetch listings again to update the list
-                            window.location.reload(); // simple reload for now until state is lifted
-                        }} />
+                        <Link href="/marketplace/create" className="block w-full h-full">
+                            <Button size="lg" className="w-full h-full min-h-[56px] text-lg font-bold shadow-xl shadow-primary/20 bg-primary hover:bg-primary/90">
+                                <Package className="mr-3 h-6 w-6" />
+                                Anunciar Material
+                            </Button>
+                        </Link>
                     </div>
                 </div>
 
